@@ -1,0 +1,8 @@
+{
+    "database" : {
+        "name" : "db_staging_name",
+        "host" : "db_staging_host",
+        "user" : "db_staging_user",
+        "password" : "db_staging_pass"
+    }
+}

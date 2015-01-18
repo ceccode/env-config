@@ -1,0 +1,8 @@
+{
+    "database" : {
+        "name" : "db_production_name",
+        "host" : "db_production_host",
+        "user" : "db_production_user",
+        "password" : "db_production_pass"
+    }
+}
