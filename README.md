@@ -1,5 +1,7 @@
 # envconfig
 
+[![Build Status](https://travis-ci.org/ceccode/env-config.svg?branch=master)](https://travis-ci.org/ceccode/env-config)
+
 env-config is a JSON config file loader based on environment var.
 
 ## examples
@@ -19,3 +21,4 @@ $dbname = $conf['database']['name'];
 ###todo
 
 • add tests
+• add json file examples
