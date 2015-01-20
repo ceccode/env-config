@@ -1,73 +1,117 @@
-<?php
+<?php namespace ffrancesco;
 
-  namespace ffrancesco;
+use ffrancesco\exceptions\FileNotFoundException;
+use ffrancesco\exceptions\InvalidFileExtensionException;
+use ffrancesco\exceptions\ParseErrorException;
+use InvalidArgumentException;
 
+class Config implements \ArrayAccess {
 
-  use ffrancesco\exceptions\FileNotFoundException;
-  use ffrancesco\exceptions\InvalidFileExtensionException;
-  use ffrancesco\exceptions\ParseErrorException;
-  use InvalidArgumentException;
+  /**
+   * @var array|mixed
+   */
+  protected $config = array ();
 
-  class Config implements \ArrayAccess {
+  /**
+   * @var string
+   */
+  protected $env;
 
-    /**
-     * @var array|mixed
-     */
-    protected $config = array();
+  /**
+   * @var string
+   */
+  protected $filename;
 
+  /**
+   * @var string
+   */
+  protected $path;
 
-    public static function get($path) {
-      return new Config($path);
+  /**
+   * @param $filename
+   * @param $path
+   * @return Config
+   */
+  public static function get($filename, $path) {
+    return new Config($filename, $path);
+  }
+
+  public function __construct($filename, $path = null) {
+
+    if (is_null($filename)) {
+      throw new InvalidArgumentException;
     }
 
+    $this->filename = $filename;
+    $this->path = is_null($path) ? '': $path;
 
-    public function __construct($path) {
+    $path = $this->buildPath();
 
-      if (is_null($path)) {
-        throw new InvalidArgumentException;
-      }
-
-      /**
-       *
-       */
-      $file_parts = pathinfo($path);
-      if (!file_exists($path)) {
-        throw new FileNotFoundException('File not found');
-      }
-
-      if ((strtolower($file_parts[ 'extension' ]) !== 'json')) {
-        throw new InvalidFileExtensionException('Invalid file extension');
-      }
-
-      $this->config = $this->load($path);
-
+    if (!file_exists($path)) {
+      throw new FileNotFoundException('File not found');
     }
 
-    protected function load($path) {
-      $config = json_decode(file_get_contents($path), true);
-
-      if (json_last_error() !== JSON_ERROR_NONE) {
-        throw new ParseErrorException('Parse error');
-      }
-
-      return $config;
-
-    }
-
-    public function offsetExists($offset) {
-      return array_key_exists($offset, $this->config);
-    }
-
-    public function offsetGet($offset) {
-      return $this->offsetExists($offset) ? $this->config[$offset]:NULL;
-    }
-
-    public function offsetSet($offset, $value) {
-      throw new \BadMethodCallException('Values cannot be changed in this class, thrown in %s');
-    }
-
-    public function offsetUnset($offset) {
-      throw new \BadMethodCallException('Values cannot be changed in this class, thrown in %s');
-    }
+    $this->config = $this->loadConfig($path);
 
   }
+
+  /**
+   * @param $path
+   * @return mixed
+   * @throws exceptions\ParseErrorException
+   */
+  protected function loadConfig($path) {
+    $config = json_decode(file_get_contents($path), true);
+
+    if (json_last_error() !== JSON_ERROR_NONE) {
+      throw new ParseErrorException('Parse error');
+    }
+
+    return $config;
+
+  }
+
+
+  /**
+   * @param mixed $offset
+   * @return bool
+   */
+  public function offsetExists($offset) {
+    return array_key_exists($offset, $this->config);
+  }
+
+  /**
+   * @param mixed $offset
+   * @return mixed|null
+   */
+  public function offsetGet($offset) {
+    return $this->offsetExists($offset) ? $this->config[ $offset ] : null;
+  }
+
+  /**
+   * @param mixed $offset
+   * @param mixed $value
+   * @throws \BadMethodCallException
+   */
+  public function offsetSet($offset, $value) {
+    throw new \BadMethodCallException('Values cannot be changed in this class, thrown in %s');
+  }
+
+  /**
+   * @param mixed $offset
+   * @throws \BadMethodCallException
+   */
+  public function offsetUnset($offset) {
+    throw new \BadMethodCallException('Values cannot be changed in this class, thrown in %s');
+  }
+
+  protected function getCurrentEnv () {
+    return getenv($this->env)?: 'local';
+  }
+
+  protected function buildPath () {
+
+    return $this->path .'/' . $this->filename . '.' . $this->getCurrentEnv() . '.json';
+  }
+
+}
