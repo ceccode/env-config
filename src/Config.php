@@ -1,7 +1,6 @@
 <?php namespace ffrancesco;
 
 use ffrancesco\exceptions\FileNotFoundException;
-use ffrancesco\exceptions\InvalidFileExtensionException;
 use ffrancesco\exceptions\ParseErrorException;
 use InvalidArgumentException;
 
@@ -28,22 +27,25 @@ class Config implements \ArrayAccess {
   protected $path;
 
   /**
+   * @param $env
    * @param $filename
    * @param $path
    * @return Config
    */
-  public static function get($filename, $path) {
-    return new Config($filename, $path);
+  public static function get($env, $filename, $path) {
+    return new Config($env, $filename, $path);
+
   }
 
-  public function __construct($filename, $path = null) {
+  public function __construct($env, $filename, $path = null) {
 
-    if (is_null($filename)) {
+    if (is_null($filename) || is_null($env)) {
       throw new InvalidArgumentException;
     }
 
+    $this->env      = $env;
     $this->filename = $filename;
-    $this->path = is_null($path) ? '': $path;
+    $this->path     = is_null($path) ? '' : $path;
 
     $path = $this->buildPath();
 
@@ -71,13 +73,13 @@ class Config implements \ArrayAccess {
 
   }
 
-
   /**
    * @param mixed $offset
    * @return bool
    */
   public function offsetExists($offset) {
     return array_key_exists($offset, $this->config);
+
   }
 
   /**
@@ -86,6 +88,7 @@ class Config implements \ArrayAccess {
    */
   public function offsetGet($offset) {
     return $this->offsetExists($offset) ? $this->config[ $offset ] : null;
+
   }
 
   /**
@@ -95,6 +98,7 @@ class Config implements \ArrayAccess {
    */
   public function offsetSet($offset, $value) {
     throw new \BadMethodCallException('Values cannot be changed in this class, thrown in %s');
+
   }
 
   /**
@@ -103,15 +107,23 @@ class Config implements \ArrayAccess {
    */
   public function offsetUnset($offset) {
     throw new \BadMethodCallException('Values cannot be changed in this class, thrown in %s');
+
   }
 
-  protected function getCurrentEnv () {
-    return getenv($this->env)?: 'local';
+  /**
+   * @return string
+   */
+  protected function getCurrentEnv() {
+    return getenv($this->env) ? : 'local';
+
   }
 
-  protected function buildPath () {
+  /**
+   * @return string
+   */
+  protected function buildPath() {
+    return $this->path . '/' . $this->filename . '.' . $this->getCurrentEnv() . '.json';
 
-    return $this->path .'/' . $this->filename . '.' . $this->getCurrentEnv() . '.json';
   }
 
 }

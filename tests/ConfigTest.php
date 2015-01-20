@@ -15,38 +15,45 @@ class ConfigTest extends \PHPUnit_Framework_TestCase {
    * @expectedException InvalidArgumentException
    */
   public function testExceptionIsRaisedForInvalidConstructorArguments() {
-    new Config(null);
+    new Config(null, null);
   }
 
   /**
    * @expectedException ffrancesco\exceptions\FileNotFoundException
    */
   public function testExceptionIsRaisedForFileNotFound() {
-    new Config('config');
+    new Config('environment', 'config');
   }
 
   /**
    * @expectedException ffrancesco\exceptions\ParseErrorException
    */
   public function testExceptionIsRaisedForMalformedJsonFile() {
-    new Config('configmalformed', (__DIR__ . '/fake'));
+    new Config('environment', 'configmalformed', (__DIR__ . '/fake'));
   }
 
   public function testConfigReturnInstanceOfArrayAccess() {
-    $config = new Config('config', (__DIR__ . '/fake'));
+    $config = new Config('environment', 'config', (__DIR__ . '/fake'));
     $this->assertInstanceOf('\ArrayAccess', $config);
 
   }
 
   public function testCanStaticallyInstanceConfig() {
-    Config::get('config', (__DIR__ . '/fake'));
+    Config::get('environment', 'config', (__DIR__ . '/fake'));
+  }
+
+  public function testCanReadConfigFromStagingEnv() {
+    putenv('environment=staging');
+    $conf = Config::get('environment', 'config', (__DIR__ . '/fake'));
+    $this->assertEquals($conf[ 'database' ][ 'name' ], 'db_staging_name');
+
   }
 
   /**
    * @expectedException \BadMethodCallException
    */
   public function testExceptionIsRaisedForSetConfigAttr() {
-    $config               = Config::get('config', (__DIR__ . '/fake'));
+    $config               = Config::get('environment', 'config', (__DIR__ . '/fake'));
     $config[ 'database' ] = 'database_2';
 
   }
@@ -55,10 +62,9 @@ class ConfigTest extends \PHPUnit_Framework_TestCase {
    * @expectedException \BadMethodCallException
    */
   public function testExceptionIsRaisedForUnsetConfigAttr() {
-    $config = Config::get('config', (__DIR__ . '/fake'));
+    $config = Config::get('environment', 'config', (__DIR__ . '/fake'));
     unset($config[ 'database' ]);
 
   }
 
-
-} 
+}

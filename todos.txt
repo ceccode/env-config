@@ -1,2 +1,2 @@
 
-1. load config base on environment var
+• add more tests
