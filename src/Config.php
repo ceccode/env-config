@@ -39,13 +39,13 @@ class Config implements \ArrayAccess {
 
   public function __construct($env, $filename, $path = null) {
 
-    if (is_null($filename) || is_null($env)) {
+    if ($filename === null || $env === null) {
       throw new InvalidArgumentException;
     }
 
     $this->env      = $env;
     $this->filename = $filename;
-    $this->path     = is_null($path) ? '' : $path;
+    $this->path     = $path === null ? '' : $path;
 
     $path = $this->buildPath();
 
@@ -125,5 +125,4 @@ class Config implements \ArrayAccess {
     return $this->path . '/' . $this->filename . '.' . $this->getCurrentEnv() . '.json';
 
   }
-
 }
