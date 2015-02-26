@@ -1,4 +1,4 @@
-<?php namespace ffrancesco\exceptions;
+<?php namespace ffrancesco\Exceptions;
 
   class ParseErrorException extends \Exception {
 

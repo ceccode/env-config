@@ -1,7 +1,7 @@
 <?php namespace ffrancesco;
 
-use ffrancesco\exceptions\FileNotFoundException;
-use ffrancesco\exceptions\ParseErrorException;
+use ffrancesco\Exceptions\FileNotFoundException;
+use ffrancesco\Exceptions\ParseErrorException;
 use InvalidArgumentException;
 
 class Config implements \ArrayAccess {
